@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Superheroes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-6 max-w-2xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Heróis</h1>
+
+    <!-- Formulário de cadastro e edição -->
+    <form id="form" onsubmit="salvar(event)" class="mb-4">
+        <input type="hidden" id="id">
+        <input id="name" placeholder="Nome" class="border p-1">
+        <input id="universe" placeholder="Universo" class="border p-1">
+        <input id="power" placeholder="Poder" class="border p-1">
+        <button class="border px-2 py-1">Salvar</button>
+        <button type="button" onclick="limpar()" class="border px-2 py-1">Cancelar</button>
+    </form>
+
+    <!-- Tabela -->
+    <table class="w-full border">
+        <tr class="bg-gray-200 text-left">
+            <th class="p-1">ID</th>
+            <th class="p-1">Nome</th>
+            <th class="p-1">Universo</th>
+            <th class="p-1">Poder</th>
+            <th class="p-1"></th>
+        </tr>
+        <tbody id="lista"></tbody>
+    </table>
+
+    <script>
+        const API = "/heroes";
+
+        // Busca os heróis e coloca na tabela
+        async function carregar() {
+            const resposta = await fetch(API);
+            const herois = await resposta.json();
+
+            let html = "";
+            for (const h of herois) {
+                html += `
+                    <tr class="border-t">
+                        <td class="p-1">${h.id}</td>
+                        <td class="p-1">${h.name}</td>
+                        <td class="p-1">${h.universe}</td>
+                        <td class="p-1">${h.power}</td>
+                        <td class="p-1">
+                            <button onclick="editar(${h.id}, '${h.name}', '${h.universe}', '${h.power}')" class="border px-2">Editar</button>
+                            <button onclick="excluir(${h.id})" class="border px-2">Excluir</button>
+                        </td>
+                    </tr>`;
+            }
+            document.getElementById("lista").innerHTML = html;
+        }
+
+        // Joga os dados do herói no formulário
+        function editar(id, name, universe, power) {
+            document.getElementById("id").value = id;
+            document.getElementById("name").value = name;
+            document.getElementById("universe").value = universe;
+            document.getElementById("power").value = power;
+        }
+
+        // Limpa o formulário
+        function limpar() {
+            document.getElementById("form").reset();
+            document.getElementById("id").value = "";
+        }
+
+        // Cadastra (sem id) ou edita (com id)
+        async function salvar(e) {
+            e.preventDefault();
+
+            const id = document.getElementById("id").value;
+            const heroi = {
+                name: document.getElementById("name").value,
+                universe: document.getElementById("universe").value,
+                power: document.getElementById("power").value
+            };
+
+            let resposta;
+            if (id == "") {
+                resposta = await fetch(API, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(heroi)
+                });
+            } else {
+                resposta = await fetch(API + "/" + id, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(heroi)
+                });
+            }
+
+            // Se deu erro, mostra a mensagem da API
+            if (!resposta.ok) {
+                const erro = await resposta.json();
+                alert(erro.message);
+                return;
+            }
+
+            limpar();
+            carregar();
+        }
+
+        // Exclui um herói
+        async function excluir(id) {
+            if (confirm("Excluir?")) {
+                await fetch(API + "/" + id, { method: "DELETE" });
+                carregar();
+            }
+        }
+
+        carregar();
+    </script>
+</body>
+</html>
