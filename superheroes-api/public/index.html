@@ -38,8 +38,14 @@
             const resposta = await fetch(API);
             const herois = await resposta.json();
 
+            // Começo com uma string vazia, vou juntando o HTML de cada linha nela
             let html = "";
+
+            // Passo por cada herói que veio da API (herois é um array)
             for (const h of herois) {
+
+                // += adiciona uma linha nova (<tr>) no final da string, sem apagar as anteriores
+                // as crases ` ` deixam eu escrever em várias linhas e usar ${} para colocar variáveis de h = herois
                 html += `
                     <tr class="border-t">
                         <td class="p-1">${h.id}</td>
@@ -52,6 +58,10 @@
                         </td>
                     </tr>`;
             }
+            // Lembrar e tentar estudar depois, quando o nome do herói possui aspas o "onclick" quebra, por exemplo O'Brien
+
+            // Só no final jogo tudo de uma vez dentro do <tbody id="lista"> da página
+            // (se eu fizesse isso dentro do for, ia sobrescrever a cada volta)
             document.getElementById("lista").innerHTML = html;
         }
 
