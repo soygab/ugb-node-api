@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const Hero = require("./models/Hero");
 const Movie = require("./models/Movie");
@@ -7,6 +8,8 @@ const app = express();
 
 // Middleware ("ponte") que lê o corpo (body) das requisições em JSON e o coloca em req.body
 app.use(express.json());
+
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 // Alterei pois estava criando duas tabelas diferentes (não sei se era prorposital),
 // porém mexi pensando no relacionamneto N:N.
